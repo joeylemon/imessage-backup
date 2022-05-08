@@ -1,7 +1,7 @@
 # imessage-backup
 ![Tests](https://github.com/joeylemon/imessage-backup/workflows/Tests/badge.svg)
 
-Backup all messages from an iPhone to free up space from your phone while allowing you to retain all of your conversation history. This script provides the ability to extract messages from an iPhone and store them freely in a zip file. This zip file can later be viewed in a companion web app (_not yet implemented_) so you never lose your old messages.
+Backup all messages (including attachments) from an iPhone to free up space while allowing you to retain all of your conversation history. This script provides the ability to extract messages from your phone and store them freely in a zip file. This zip file can be later viewed in a companion web app (_not yet implemented_) so you never lose access to your old messages.
 
 ## Usage
 
