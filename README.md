@@ -6,17 +6,16 @@ Backup all messages (including attachments) from an iPhone to free up space whil
 ## Usage
 
 ```
-usage: main.py [-h] {backup,gen} ...
+usage: main.py [-h] [-o OUT] input
 
 Backup messages from an iPhone
 
 positional arguments:
-  {backup,gen}
-    backup      backup all messages from an iPhone backup
-    gen         generate a webpage to easily view messages
+  input              the directory path containing the iPhone backup
 
 optional arguments:
-  -h, --help    show this help message and exit
+  -h, --help         show this help message and exit
+  -o OUT, --out OUT  the name of the output zip file
 ```
 
 ### Get started
