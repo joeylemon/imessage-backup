@@ -6,27 +6,12 @@ import shutil
 import sqlite3
 import json
 import tempfile
-from turtle import back
 import phonenumbers
 
 
 class BackupTool:
     """
-    Take in a iPhone backup directory and generate a zip file with the following structure:
-
-    out.zip/
-    -> messages.json
-    -> contacts.json
-    -> attachments/
-       -> 0AB09373-F366-4D3B-85FC-1ABA33EE534F-jpeg-image-xIcbg.jpeg
-       -> 3A5AD82C-1CE0-404E-86D4-149522201EDB-FullSizeRender.jpg
-       -> ...
-
-    The messages.json file contains entries with the following format:
-    {"id": 24341, "chat_title": "Family Chat", "chat_identifier": "chat36260175973343405", "participants": ["+11111111111","+11111111111"], "sender": "+11111111111", "is_from_me": false, "text": "hello!", "date": 1480095057, "attachment_path": null}
-
-    Similarly, the contacts.json file has the format:
-    {"id": 1, "first_name": "Dad", "last_name": null, "identifiers": ["+1111111111"]}
+    Take a iPhone backup directory and generate a zip file with the backed up messages.
     """
 
     def __init__(self, in_dir: str, out_file: str) -> None:
@@ -68,6 +53,7 @@ class BackupTool:
 
     def run(self) -> None:
         """ Search the backup directory in_dir for messages and create a zip file at out_file. """
+        tempdir = None
         try:
             messages = self._get_messages()
             contacts = self._get_contacts()
@@ -102,11 +88,19 @@ class BackupTool:
 
             # Build the .zip file of the backup data
             shutil.make_archive(Path(self.out_file), 'zip', tempdir)
+        except sqlite3.DatabaseError as e:
+            if "file is not a database" in str(e):
+                print("There was a problem reading the messages. It looks like this iPhone backup may be encrypted. This script requires unencrypted backups.")
+            else:
+                print(f"There was a problem reading the messages: {e}")
+        except KeyboardInterrupt:
+            print("Interrupted. Cancelling backup.")
         except Exception as e:
-            print(f"an error occurred while backing up messages: {e}")
+            print(f"Something went wrong while processing the messages: {e}")
         finally:
             # Always delete the temporary directory
-            shutil.rmtree(tempdir, ignore_errors=True)
+            if tempdir:
+                shutil.rmtree(tempdir, ignore_errors=True)
 
 
 class Message(dict):
