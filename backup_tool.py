@@ -151,7 +151,7 @@ class Message():
         filepath = Path(in_dir, dirname, filename)
         if not os.path.exists(filepath):
             raise FileNotFoundError(
-                f"error: failed to find attachment {self.attachment_path} at {filepath}")
+                f"failed to find attachment {self.attachment_path} at {filepath}")
 
         return filepath
 
