@@ -15,7 +15,7 @@ positional arguments:
 
 optional arguments:
   -h, --help         show this help message and exit
-  -o OUT, --out OUT  the name of the output zip file
+  -o OUT, --out OUT  the name of the output file
 ```
 
 ### Get started
@@ -36,20 +36,21 @@ optional arguments:
 ## Backing up your messages
 First, create an unencrypted backup of your iPhone directly onto your computer ([how to do this?](https://support.apple.com/guide/iphone/back-up-iphone-iph3ecf67d29/ios)). Then, find the path to the folder containing your backup and pass it to the script:
 ```
-> python main.py  "E:\Users\Joey\Apple\MobileSync\Backup\12345678-000919512230001E" -o backup
+> python main.py  "E:\Users\Joey\Apple\MobileSync\Backup\12345678-000919512230001E" -o backup.zip
 ```
 
 This will create a file named `backup.zip` containing the following directory structure:
 ```
 backup.zip
---> messages.json
---> contacts.json
+--> chats/
+    --> chat_1634.json
+    --> chat_1695.json
 --> attachments/
     --> 0AB09373-F366-4D3B-85FC-1ABA33EE534F-jpeg-image-xIcbg.jpeg
     --> 3A5AD82C-1CE0-404E-86D4-149522201EDB-FullSizeRender.jpg
 ```
 
-The `messages.json` file contains every message sent to and from your phone, with information including the chat title, the chat participants, and a link to an attachment if present. This file represents all chat participants as phone numbers. Therefore, the `contacts.json` file contains all contacts on your phone, allowing the cross-reference of phone numbers to contact names.
+The `chats/` directory contains files representing every conversation on your phone, with information including the title, the participants, and all the messages ever received in it. All messages that were sent with attachments contain the path to the attachment stored in the `backup.zip` file.
 
 ## Viewing Stored Messages
 _This functionality has not yet been implemented._
