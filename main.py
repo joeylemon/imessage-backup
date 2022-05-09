@@ -1,7 +1,8 @@
 import argparse
 import os
 from pathlib import Path
-from backup_tool import BackupTool, get_archive_format
+from backup_tool import BackupTool
+from utils import get_archive_format
 
 
 """

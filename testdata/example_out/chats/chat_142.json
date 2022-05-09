@@ -1,0 +1,39 @@
+{
+    "chat_id": 142,
+    "chat_identifier": "chat36260175973343405",
+    "display_name": "Family Chat",
+    "last_message_date": 1480130840,
+    "participants": {
+        "+11111111111": "Dad",
+        "+11111111112": "+11111111112",
+        "+11111111113": "+11111111113",
+        "+11111111114": "+11111111114",
+        "+11111111115": "+11111111115"
+    },
+    "messages": [
+        {
+            "id": 24341,
+            "date": 1480095057,
+            "sender": "+11111111114",
+            "is_from_me": false,
+            "text": "Test message 1",
+            "attachment_path": "A06F2E76-B277-4429-A4F7-61F7FE60D2ED-ms-G5Go5i.gif"
+        },
+        {
+            "id": 24342,
+            "date": 1480119198,
+            "sender": "+11111111111",
+            "is_from_me": false,
+            "text": "Test message 2",
+            "attachment_path": null
+        },
+        {
+            "id": 24343,
+            "date": 1480130840,
+            "sender": "+11111111113",
+            "is_from_me": false,
+            "text": "Test message 3",
+            "attachment_path": null
+        }
+    ]
+}

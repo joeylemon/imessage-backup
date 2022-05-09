@@ -1,0 +1,28 @@
+{
+    "chat_id": 226,
+    "chat_identifier": "chat45372165166753",
+    "display_name": "Brother Chat",
+    "last_message_date": 1480274824,
+    "participants": {
+        "+11111111111": "Dad",
+        "+11111111114": "+11111111114"
+    },
+    "messages": [
+        {
+            "id": 24344,
+            "date": 1480274437,
+            "sender": "+11111111111",
+            "is_from_me": false,
+            "text": "Test message 4",
+            "attachment_path": null
+        },
+        {
+            "id": 24345,
+            "date": 1480274824,
+            "sender": null,
+            "is_from_me": true,
+            "text": "Test message 5",
+            "attachment_path": null
+        }
+    ]
+}
