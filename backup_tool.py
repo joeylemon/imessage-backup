@@ -8,6 +8,7 @@ import sqlite3
 import json
 import tempfile
 import phonenumbers
+from alive_progress import alive_it
 import utils
 
 
@@ -19,18 +20,15 @@ class BackupTool:
         self.out_file = out_file
 
         # Apple stores sqlite database files in the backup directory
-        self._messages_db_file = Path(
-            in_dir, "3d", "3d0d7e5fb2ce288813306e4d4636395e047a3d28")
-        self._contacts_db_file = Path(
-            in_dir, "31", "31bb7ba8914766d4ba40d6dfb6113c8b614be442")
+        self._messages_db_file = Path(in_dir, "3d", "3d0d7e5fb2ce288813306e4d4636395e047a3d28")
+        self._contacts_db_file = Path(in_dir, "31", "31bb7ba8914766d4ba40d6dfb6113c8b614be442")
 
     def _get_messages(self) -> list[Message]:
         """ Execute the get_messages.sql query and store in a list of Messages. """
         conn = sqlite3.connect(self._messages_db_file)
         conn.row_factory = Message.row_factory
         cursor = conn.cursor()
-        query = utils.read_file(
-            Path(Path(__file__).parent, "sql", "get_messages.sql").resolve())
+        query = utils.read_file(Path(Path(__file__).parent, "sql", "get_messages.sql").resolve())
         cursor.execute(query)
         return cursor.fetchall()
 
@@ -39,8 +37,7 @@ class BackupTool:
         conn = sqlite3.connect(self._contacts_db_file)
         conn.row_factory = Contact.row_factory
         cursor = conn.cursor()
-        query = utils.read_file(
-            Path(Path(__file__).parent, "sql", "get_contacts.sql").resolve())
+        query = utils.read_file(Path(Path(__file__).parent, "sql", "get_contacts.sql").resolve())
         cursor.execute(query)
         return cursor.fetchall()
 
@@ -49,8 +46,7 @@ class BackupTool:
         conn = sqlite3.connect(self._messages_db_file)
         conn.row_factory = Chat.row_factory
         cursor = conn.cursor()
-        query = utils.read_file(
-            Path(Path(__file__).parent, "sql", "get_chats.sql").resolve())
+        query = utils.read_file(Path(Path(__file__).parent, "sql", "get_chats.sql").resolve())
         cursor.execute(query)
         return cursor.fetchall()
 
@@ -71,51 +67,26 @@ class BackupTool:
             os.mkdir(chats_dir)
 
             # Copy message attachments
-            messages_with_attachments = [
-                m for m in messages if m.attachment_path is not None]
-            num_attachments = len(messages_with_attachments)
-            print(f"{num_attachments} attachments to copy to archive")
-            for i, msg in enumerate(messages_with_attachments):
+            messages_with_attachments = [m for m in messages if m.attachment_path is not None]
+            for msg in alive_it(messages_with_attachments, title="Copy attachments"):
                 try:
                     msg.copy_attachment(self.in_dir, attachments_dir)
-                    if i % 100 == 0:
-                        print(f"Copied attachment {i}/{num_attachments}")
-                except FileNotFoundError as e:
+                except Exception as e:
                     # Print and continue
                     print(e)
 
             # Create a file for each conversation
-            num_chats = len(chats)
-            print(f"{num_chats} chats to copy to archive")
-            for i, chat in enumerate(chats):
-                chat_messages = [{
-                    "id": m.id,
-                    "date": m.date,
-                    "sender": m.sender,
-                    "is_from_me": m.is_from_me,
-                    "text": m.text,
-                    "attachment_path": m.get_attachment_dest_filename()
-                } for m in messages if m.chat_identifier == chat.chat_identifier]
-
+            for chat in alive_it(chats, title="Copy conversations"):
+                chat_messages = [m.to_dict() for m in messages if m.chat_identifier == chat.chat_identifier]
                 with open(Path(chats_dir, f"chat_{chat.id}.json"), "w") as f:
-                    f.write(json.dumps({
-                        "chat_id": chat.id,
-                        "chat_identifier": chat.chat_identifier,
-                        "display_name": chat.display_name,
-                        "last_message_date": chat.last_message_date,
-                        "participants": chat.get_participant_names(contacts),
-                        "messages": chat_messages
-                    }, indent=4))
-
-                if i % 100 == 0:
-                    print(f"Copied chat {i}/{num_chats}")
+                    f.write(json.dumps(chat.to_dict(chat_messages, contacts), indent=4))
 
             # Build the .zip file of the backup data
-            print(f"Creating archive at {self.out_file}")
+            print(f"Creating archive at {self.out_file}. This may take a long time.")
             shutil.make_archive(Path(self.out_file).with_suffix(''), archive_format, temp_dir)
         except sqlite3.DatabaseError as e:
             if "file is not a database" in str(e):
-                print("There was a problem reading the messages. It looks like this iPhone backup may be encrypted. This script requires unencrypted backups.")
+                print("There was a problem reading the messages. It looks like this iPhone backup may be encrypted — this script requires unencrypted backups.")
             else:
                 print(f"There was a problem reading the messages: {e}")
         except KeyboardInterrupt:
@@ -168,6 +139,16 @@ class Message():
             src = self.get_attachment_source(in_dir)
             dst_name = self.get_attachment_dest_filename()
             shutil.copy2(src, Path(out_dir, dst_name))
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "date": self.date,
+            "sender": self.sender,
+            "is_from_me": self.is_from_me,
+            "text": self.text,
+            "attachment_path": self.get_attachment_dest_filename()
+        }
 
     @staticmethod
     def row_factory(cursor, row):
@@ -229,6 +210,16 @@ class Chat():
                 names[id] = id
 
         return names
+
+    def to_dict(self, messages: list[Message], contacts: list[Contact]) -> dict:
+        return {
+            "chat_id": self.id,
+            "chat_identifier": self.chat_identifier,
+            "display_name": self.display_name,
+            "last_message_date": self.last_message_date,
+            "participants": self.get_participant_names(contacts),
+            "messages": messages
+        }
 
     @staticmethod
     def row_factory(cursor, row):

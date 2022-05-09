@@ -13,5 +13,5 @@ LEFT JOIN chat c ON cmj.chat_id = c.rowid
 LEFT JOIN handle h ON m.handle_id = h.rowid
 LEFT JOIN message_attachment_join maj ON maj.message_id = m.rowid
 LEFT JOIN attachment a ON a.rowid = maj.attachment_id
-WHERE m.text IS NOT NULL
+WHERE m.text IS NOT NULL OR a.filename IS NOT NULL
 ORDER BY m.date;

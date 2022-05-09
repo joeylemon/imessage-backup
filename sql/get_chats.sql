@@ -10,5 +10,5 @@ LEFT JOIN chat_message_join cmj ON cmj.chat_id = c.rowid
 LEFT JOIN chat_handle_join chj ON chj.chat_id = c.rowid
 LEFT JOIN handle h ON h.rowid = chj.handle_id
 WHERE cmj.message_date IS NOT NULL
-GROUP BY c.chat_identifier
+GROUP BY c.rowid
 ORDER BY last_message_date DESC;

@@ -1,1 +1,4 @@
+about-time==3.1.1
+alive-progress==2.4.1
+grapheme==0.6.0
 phonenumbers==8.12.48
