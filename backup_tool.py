@@ -1,14 +1,14 @@
 from __future__ import annotations
-from lib2to3.pytree import convert
-import os
 from pathlib import Path
 from hashlib import sha1
+from alive_progress import alive_it
+import os
 import shutil
 import sqlite3
 import json
 import tempfile
+import time
 import phonenumbers
-from alive_progress import alive_it
 import utils
 
 
@@ -82,8 +82,11 @@ class BackupTool:
                     f.write(json.dumps(chat.to_dict(chat_messages, contacts), indent=4))
 
             # Build the .zip file of the backup data
-            print(f"Creating archive at {self.out_file}. This may take a long time.")
-            shutil.make_archive(Path(self.out_file).with_suffix(''), archive_format, temp_dir)
+            archive_out = Path(self.out_file)
+            print(f"Creating archive at {archive_out}. This may take a long time.")
+            start_time = time.time()
+            shutil.make_archive(archive_out.with_suffix(''), archive_format, temp_dir)
+            print(f"Created {archive_out.stat().st_size / 1e+9:.1f}GB archive in {(time.time() - start_time) / 60:.2f} minutes.")
         except sqlite3.DatabaseError as e:
             if "file is not a database" in str(e):
                 print("There was a problem reading the messages. It looks like this iPhone backup may be encrypted — this script requires unencrypted backups.")
@@ -106,14 +109,16 @@ class Message():
         self.chat_identifier = chat_identifier
         self.sender = sender
         self.is_from_me = is_from_me == 1
-        self.text = text.strip()
+        self.text = text
+        if self.text:
+            self.text = self.text.strip()
         self.date = utils.convert_date(date)
         self.attachment_path = attachment_path
 
     def get_attachment_source(self, in_dir: str) -> Path:
         """ Find the actual path to the attachment in the backup directory. """
         # Apple generates the backup directory structure by SHA1 hashing the path
-        domainpath = "MediaDomain-" + self.attachment_path[2:]
+        domainpath = "MediaDomain-" + self.attachment_path.replace("~/", "")
         filename = sha1(domainpath.encode('utf-8')).hexdigest()
 
         # The backup directory is organized into subfolders using the first two digits of the hash
