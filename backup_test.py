@@ -90,6 +90,7 @@ class TestBackupTool(unittest.TestCase):
         with open(get_chats_sql_path, 'r') as f:
             files[get_chats_sql_path] = f.read()
 
+        # Patch the grapheme JSON file since alive_progress opens it (?)
         grapheme_path = Path(
             Path(__file__).parent, "testdata", "grapheme_break_property.json").resolve()
         with open(grapheme_path, 'r') as f:

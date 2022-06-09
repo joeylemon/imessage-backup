@@ -1,13 +1,5 @@
 from pathlib import Path
 
-FILE_EXT_TO_ARCHIVE_TYPE = {
-    ".tar.gz": "gztar",
-    ".tar.bz": "bztar",
-    ".tar.xz": "xztar",
-    ".tar": "tar",
-    ".zip": "zip",
-}
-
 def convert_date(date: int) -> int:
     """ Convert an epoch timestamp from iPhone to a standard UNIX timestamp. """
     # Apple starts epoch at 2001-01-01
@@ -24,10 +16,3 @@ def read_file(file) -> str:
         with open(file, 'r') as f:
             output = f.read()
         return output
-
-def get_archive_format(out_file: str) -> str:
-    out_ext = ''.join(Path(out_file).suffixes)
-    if out_ext in FILE_EXT_TO_ARCHIVE_TYPE:
-        return FILE_EXT_TO_ARCHIVE_TYPE[out_ext]
-
-    raise ValueError(f"unknown archive format for output extension {out_ext}")

@@ -58,8 +58,6 @@ class BackupTool:
             contacts = self._get_contacts()
             chats = self._get_chats()
 
-            archive_format = utils.get_archive_format(self.out_file)
-
             # Create temporary directory structure
             attachments_dir = Path(temp_dir, "attachments")
             chats_dir = Path(temp_dir, "chats")
@@ -85,7 +83,7 @@ class BackupTool:
             archive_out = Path(self.out_file)
             print(f"Creating archive at {archive_out}. This may take a long time.")
             start_time = time.time()
-            shutil.make_archive(archive_out.with_suffix(''), archive_format, temp_dir)
+            shutil.make_archive(archive_out.with_suffix(''), "zip", temp_dir)
             print(f"Created {archive_out.stat().st_size / 1e+9:.1f}GB archive in {(time.time() - start_time) / 60:.2f} minutes.")
         except sqlite3.DatabaseError as e:
             if "file is not a database" in str(e):
