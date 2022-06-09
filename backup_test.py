@@ -1,4 +1,5 @@
 import unittest
+import site
 from unittest import mock
 from pathlib import Path
 from backup_tool import BackupTool, Message, Contact, Chat
@@ -88,6 +89,10 @@ class TestBackupTool(unittest.TestCase):
             Path(__file__).parent, "sql", "get_chats.sql").resolve()
         with open(get_chats_sql_path, 'r') as f:
             files[get_chats_sql_path] = f.read()
+
+        grapheme_path = Path(site.getsitepackages()[-1], "grapheme", "data").__str__() + "/grapheme_break_property.json"
+        with open(grapheme_path, 'r') as f:
+            files[grapheme_path] = f.read()
 
         def open_mock(path, *args, **kwargs):
             for expected_path, content in files.items():
