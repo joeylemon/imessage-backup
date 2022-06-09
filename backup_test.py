@@ -90,13 +90,14 @@ class TestBackupTool(unittest.TestCase):
         with open(get_chats_sql_path, 'r') as f:
             files[get_chats_sql_path] = f.read()
 
-        grapheme_path = Path(site.getsitepackages()[-1], "grapheme", "data").__str__() + "/grapheme_break_property.json"
+        grapheme_path = Path(
+            Path(__file__).parent, "testdata", "grapheme_break_property.json").resolve()
         with open(grapheme_path, 'r') as f:
-            files[grapheme_path] = f.read()
+            files["/grapheme_break_property.json"] = f.read()
 
         def open_mock(path, *args, **kwargs):
             for expected_path, content in files.items():
-                if path == expected_path:
+                if expected_path.__str__() in path.__str__():
                     return mock.mock_open(read_data=content).return_value
                 elif args[0] == "w":
                     return mock.mock_open(read_data="").return_value
@@ -127,7 +128,8 @@ class TestBackupTool(unittest.TestCase):
     @mock.patch("backup_tool.os")
     @mock.patch("backup_tool.tempfile")
     @mock.patch.object(Message, "copy_attachment")
-    def test_run(self, mock_msg_copy, mock_tempfile, mock_os, mock_shutil):
+    @mock.patch.object(Path, "stat", return_value=type('',(object,),{"st_size": 1e+8})())
+    def test_run(self, mock_path_stat, mock_msg_copy, mock_tempfile, mock_os, mock_shutil):
         out_dir = Path("User", "AppData", "Temp")
         mock_tempfile.mkdtemp.return_value = out_dir
 
@@ -137,6 +139,7 @@ class TestBackupTool(unittest.TestCase):
         mock_tempfile.mkdtemp.assert_called_once()
         mock_os.mkdir.assert_has_calls([mock.call(Path(out_dir, "attachments")), mock.call(Path(out_dir, "chats"))])
         mock_msg_copy.assert_called_once_with(get_test_backup_path(), Path(out_dir, "attachments"))
+        mock_path_stat.assert_called_once()
         mock_shutil.make_archive.assert_called_once_with(
             Path("out"), "zip", out_dir)
 
